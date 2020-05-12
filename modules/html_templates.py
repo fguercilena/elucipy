@@ -1,4 +1,7 @@
-document_template = r"""
+"""Templates to generate .html files"""
+
+
+DOCUMENT_TEMPLATE = r"""
 <html>
     <head>
         <title> {0:s} </title>
@@ -31,7 +34,7 @@ document_template = r"""
 </html>
 """
 
-row_template = r"""
+ROW_TEMPLATE = r"""
 <tr>
     <td style="vertical-align: top">
         {0:s}
@@ -42,7 +45,7 @@ row_template = r"""
 </tr>
 """
 
-header_template = r"""
+HEADER_TEMPLATE = r"""
 <tr>
     <td style="vertical-align: center; font-variant: small-caps"
         colspan="2" class="explanation">

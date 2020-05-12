@@ -1,94 +1,103 @@
 #!/usr/bin/env python3
+"""Main elucioy function"""
 
 
 import argparse
 import time
+import sys
 from os.path import split, splitext, join
 from pygments.lexers import PythonLexer
 from pygments.formatters import HtmlFormatter
 
 from modules.file_checking import check_file
 from modules.file_processing import process_file
-from modules.html_templates import document_template
-from modules.styles import native
+from modules.html_templates import DOCUMENT_TEMPLATE
+from modules.styles import NATIVE
 
 
-##############################################################################
-# Parse command line arguments
-##############################################################################
+def main():
+    """Main elucipy function"""
 
-version = "elucipy -- version 0.1 (May 2020)"
-epilog = """Federico Maria Guercilena
-(fguercilena@theorie.ikp.physik.tu-darmstadt.de)"""
-description = """Generate a .html document showing the source code of the
-input files, with a parallel explanation running along it,
-generated from the comments in the code."""
+    ###########################################################################
+    # Parse command line arguments
+    ###########################################################################
 
-parser = argparse.ArgumentParser(add_help=True, epilog=epilog,
-                                 description=description)
+    version = "elucipy -- version 0.1 (May 2020)"
+    epilog = """Federico Maria Guercilena
+    (fguercilena@theorie.ikp.physik.tu-darmstadt.de)"""
+    description = """Generate a .html document showing the source code of the
+    input files, with a parallel explanation running along it,
+    generated from the comments in the code."""
 
-parser.add_argument("--version", action="version", version=version,
-                    help="print version information and exit")
+    parser = argparse.ArgumentParser(add_help=True, epilog=epilog,
+                                     description=description)
 
-parser.add_argument("filenames", nargs='+', help="input file(s) path")
-parser.add_argument("-o", "--out-directory", default=None, dest="outdir",
-                    help="output directory")
+    parser.add_argument("--version", action="version", version=version,
+                        help="print version information and exit")
 
-args = parser.parse_args()
+    parser.add_argument("filenames", nargs='+', help="input file(s) path")
+    parser.add_argument("-o", "--out-directory", default=None, dest="outdir",
+                        help="output directory")
+
+    args = parser.parse_args()
 
 
-##############################################################################
-# Setup the lexer
-##############################################################################
+    ###########################################################################
+    # Setup the lexer
+    ###########################################################################
 
-lexer = PythonLexer(stripnl=False, stripall=False, ensurenl=True, tabsize=4,
-                    encoding="utf-8")
+    lexer = PythonLexer(stripnl=False, stripall=False, ensurenl=True, tabsize=4,
+                        encoding="utf-8")
 
-formatter = HtmlFormatter(full=False, encoding="utf-8", outencoding="utf-8",
-                          linenos="inline", linenostart=1,
-                          linenostep=1, lineanchors="line",
-                          anchorlinenos=True, lineseparator="<br>")
+    formatter = HtmlFormatter(full=False, encoding="utf-8", outencoding="utf-8",
+                              linenos="inline", linenostart=1,
+                              linenostep=1, lineanchors="line",
+                              anchorlinenos=True, lineseparator="<br>")
 
-style_defs = formatter.get_style_defs()
+    start = time.time()
 
-start = time.time()
+    for filename in args.filenames:
 
-for filename in args.filenames:
+        with open(filename, 'r') as i:
+            content = i.read()
 
-    with open(filename, 'r') as i:
-        content = i.read()
+        directory, filename = split(filename)
+        filename_base = splitext(filename)[0]
 
-    directory, filename = split(filename)
-    filename_base = splitext(filename)[0]
+        if args.outdir is not None:
+            directory = args.outdir
 
-    if args.outdir is not None:
-        directory = args.outdir
+        process, content, title, intro = check_file(content, filename)
 
-    process, content, title, intro = check_file(content, filename)
+        if not process:
+            print(f"Nothing to do for {filename:s}")
+            continue
 
-    if not process:
-        print(f"Nothing to do for {filename:s}")
-        continue
-    else:
         print(f"Processing {filename:s}... ", end="")
 
-    out = process_file(content, lexer, formatter)
+        out = process_file(content, lexer, formatter)
 
-    out = document_template.format(title, intro, out)
+        out = DOCUMENT_TEMPLATE.format(title, intro, out)
 
-    with open(join(directory, f"{filename_base:s}.html"), 'w') as o:
-        o.write(out)
+        with open(join(directory, f"{filename_base:s}.html"), 'w') as o_f:
+            o_f.write(out)
 
-    with open(join(directory, "native.css"), 'w') as s:
-        s.write(native)
+        with open(join(directory, "native.css"), 'w') as s_f:
+            s_f.write(NATIVE)
 
-    print("Done.")
+        print("Done.")
 
-stop = time.time()
+    stop = time.time()
 
-total = stop - start
+    total = stop - start
 
-print("")
-print("All done!")
-print("")
-print(f"Processed {len(args.filenames):d} files in {total:f} seconds")
+    print("")
+    print("All done!")
+    print("")
+    print(f"Processed {len(args.filenames):d} files in {total:f} seconds")
+
+
+if __name__ == "__main__":
+    main()
+else:
+    sys.exit("Not meant to be imported!")

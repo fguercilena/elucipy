@@ -1,16 +1,20 @@
-from re import sub, compile, MULTILINE
-from sys import exit
+"""Parse a file"""
+
+import sys
+from re import sub, MULTILINE
+from re import compile as compile_re
 
 
-explanation_regex = compile(r"(^[ \t\f\v]*# .*\n)+\n*", MULTILINE)
-header_regex = compile(r"((^[ \t\f\v]*)#{2,}\n)\2# (.*\n)\1\n*", MULTILINE)
-code_regex = compile(r"(^[ \t\f\v]*[^# \t\f\v\n].*\n)+\n*", MULTILINE)
-# triple_quote_regex = compile(r"\"\"\".*\"\"\"", DOTALL)
-# double_quote_regex = compile(r"\".*\"")
-# single_quote_regex = compile(r"\'.*\'")
+explanation_regex = compile_re(r"(^[ \t\f\v]*# .*\n)+\n*", MULTILINE)
+header_regex = compile_re(r"((^[ \t\f\v]*)#{2,}\n)\2# (.*\n)\1\n*", MULTILINE)
+code_regex = compile_re(r"(^[ \t\f\v]*[^# \t\f\v\n].*\n)+\n*", MULTILINE)
+# triple_quote_regex = compile_re(r"\"\"\".*\"\"\"", DOTALL)
+# double_quote_regex = compile_re(r"\".*\"")
+# single_quote_regex = compile_re(r"\'.*\'")
 
 
 def parse_block(text, pos):
+    """Parse text to identify the first block"""
 
     m = header_regex.match(text, pos)
     if m:
@@ -25,15 +29,15 @@ def parse_block(text, pos):
     if m:
         return "code", m[0], m.end(0), m[0].count("\n")
 
-    else:
-        print("\nWarning: couldn't identify the following code:\n",
-              text[pos:pos + 200] + " [truncated]",
-              "Assuming the rest of the file contains only code "
-              "and continuing...")
-        return "code", text[pos:], len(text), text[pos:].count("\n")
+    print("\nWarning: couldn't identify the following code:\n",
+          text[pos:pos + 200] + " [truncated]",
+          "Assuming the rest of the file contains only code "
+          "and continuing...")
+    return "code", text[pos:], len(text), text[pos:].count("\n")
 
 
 def merge_blocks(blocks):
+    """Merge consecutive blocks of the same type"""
 
     merged = []
 
@@ -45,7 +49,7 @@ def merge_blocks(blocks):
             if len(merged) == 0:
                 merged.append((t, v, ln))
             elif merged[-1][0] == "header":
-                exit("Error: found consecutive headers. Aborting.")
+                sys.exit("Error: found consecutive headers. Aborting.")
             else:
                 merged.append((t, v, ln))
         elif t == "explanation":
@@ -67,6 +71,7 @@ def merge_blocks(blocks):
 
 
 def get_blocks(content):
+    """Iterate trough a file and return its blocks"""
 
     blocks = []
 
