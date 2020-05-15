@@ -1,6 +1,3 @@
-"""Templates to generate .html files"""
-
-
 DOCUMENT_TEMPLATE = r"""
 <html>
     <head>

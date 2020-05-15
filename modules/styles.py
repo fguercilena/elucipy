@@ -1,5 +1,3 @@
-"""A style sheet for the .html output"""
-
 NATIVE = r"""
 td.linenos { background-color: #f0f0f0; padding-right: 10px; }
 span.lineno { background-color: #f0f0f0; padding: 0 5px 0 5px; }

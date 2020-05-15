@@ -1,16 +1,10 @@
-"""Process a file to extract documentation"""
-
-
-import sys
 from re import sub
 from pygments import highlight
 
-from .parsing import get_blocks
 from .html_templates import ROW_TEMPLATE, HEADER_TEMPLATE
 
 
 def lineno_align(m):
-    """Properly align line numbers"""
 
     return f'<span class="lineno">{int(m.group(1)): 4d} <'
 
@@ -44,10 +38,9 @@ def process_blocks(blocks, lexer, formatter):
     return processed
 
 
-def process_file(content, lexer, formatter):
-    """Get a file blocks and process them"""
+def process_file(content, parser, lexer, formatter):
 
-    blocks = get_blocks(content)
+    blocks = parser.get_blocks(content)
     blocks = process_blocks(blocks, lexer, formatter)
 
     out = ""
@@ -76,8 +69,6 @@ def process_file(content, lexer, formatter):
                 out += HEADER_TEMPLATE.format(v2)
             elif t2 is None:
                 out += ROW_TEMPLATE.format("", v1)
-            else:
-                sys.exit("Not sure 1")
 
         elif t1 == "header":
             out += HEADER_TEMPLATE.format(v1)

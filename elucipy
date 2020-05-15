@@ -1,61 +1,93 @@
 #!/usr/bin/env python3
-"""Main elucioy function"""
 
 
 import argparse
 import time
-import sys
 from os.path import split, splitext, join
-from pygments.lexers import PythonLexer
+from pygments.lexers import get_lexer_by_name, guess_lexer_for_filename
 from pygments.formatters import HtmlFormatter
 
-from modules.file_checking import check_file
-from modules.file_processing import process_file
+from modules.print_utils import pERROR, pHIGHLIGHT
+from modules.parsing import Parser
+from modules.process import process_file
 from modules.html_templates import DOCUMENT_TEMPLATE
 from modules.styles import NATIVE
 
 
+VERSION = "elucipy -- version 0.1 (May 2020)"
+EPILOG = """Federico Maria Guercilena
+(fguercilena@theorie.ikp.physik.tu-darmstadt.de)"""
+DESCRIPTION = """Generate a .html document showing the source code of the
+input files, with a parallel explanation running along it,
+generated from the comments in the code."""
+
+SUPPORTED_LAGUAGES = ("python", "fortran")
+
+
 def main():
-    """Main elucipy function"""
 
-    ###########################################################################
     # Parse command line arguments
-    ###########################################################################
+    cl_parsr = argparse.ArgumentParser(add_help=True, epilog=EPILOG,
+                                       description=DESCRIPTION)
 
-    version = "elucipy -- version 0.1 (May 2020)"
-    epilog = """Federico Maria Guercilena
-    (fguercilena@theorie.ikp.physik.tu-darmstadt.de)"""
-    description = """Generate a .html document showing the source code of the
-    input files, with a parallel explanation running along it,
-    generated from the comments in the code."""
+    cl_parsr.add_argument("--version", action="version", version=VERSION,
+                          help="print version information and exit")
 
-    parser = argparse.ArgumentParser(add_help=True, epilog=epilog,
-                                     description=description)
+    cl_parsr.add_argument("filenames", nargs='+', help="input file(s) path")
+    cl_parsr.add_argument("-l", "--language", default=None, dest="lang",
+                          choices=SUPPORTED_LAGUAGES,
+                          help="programming language of the input files")
+    cl_parsr.add_argument("-o", "--out-directory", default=None, dest="outdir",
+                          help="output directory")
+    cl_parsr.add_argument("-q", "--quiet", default=False, action="store_true",
+                          dest="quiet", help="quiet mode")
 
-    parser.add_argument("--version", action="version", version=version,
-                        help="print version information and exit")
+    args = cl_parsr.parse_args()
 
-    parser.add_argument("filenames", nargs='+', help="input file(s) path")
-    parser.add_argument("-o", "--out-directory", default=None, dest="outdir",
-                        help="output directory")
+    if not args.quiet:
+        start = time.time()
 
-    args = parser.parse_args()
-
-
-    ###########################################################################
-    # Setup the lexer
-    ###########################################################################
-
-    lexer = PythonLexer(stripnl=False, stripall=False, ensurenl=True, tabsize=4,
-                        encoding="utf-8")
-
-    formatter = HtmlFormatter(full=False, encoding="utf-8", outencoding="utf-8",
+    # Setup the formatter
+    formatter = HtmlFormatter(full=False, encoding="utf-8",
+                              outencoding="utf-8",
                               linenos="inline", linenostart=1,
                               linenostep=1, lineanchors="line",
                               anchorlinenos=True, lineseparator="<br>")
 
-    start = time.time()
+    # Setup the lexer and parser
+    tabsizes = {"python": 4, "fortran": 3}
 
+    if args.lang is not None:
+        lexer = get_lexer_by_name(args.lang, stripnl=False, stripall=False,
+                                  ensurenl=True, encoding="utf-8",
+                                  tabsize=tabsizes[args.lang])
+        parser = Parser(args.lang)
+
+    else:
+        with open(args.filenames[0], 'r') as i:
+            content = i.read()
+
+        lexer = guess_lexer_for_filename(args.filenames[0], content,
+                                         stripnl=False, stripall=False,
+                                         ensurenl=True, encoding="utf-8")
+        lexer_name = lexer.name.lower()
+        if lexer_name == "numpy":
+            lexer = get_lexer_by_name("python", stripnl=False, stripall=False,
+                                      ensurenl=True, encoding="utf-8")
+            lexer_name = "python"
+        elif lexer_name not in SUPPORTED_LAGUAGES:
+            pERROR("Unsupported language (pygments guessed "
+                   f"the language as '{lexer_name:s}')")
+
+        lexer.tabsize = tabsizes[lexer_name]
+        parser = Parser(lexer_name)
+
+    if not args.quiet:
+        print("Processing input as "
+              f"'{args.lang if args.lang is not None else lexer_name:s}' "
+              "files.\n")
+
+    # Main loop over the input files
     for filename in args.filenames:
 
         with open(filename, 'r') as i:
@@ -67,37 +99,44 @@ def main():
         if args.outdir is not None:
             directory = args.outdir
 
-        process, content, title, intro = check_file(content, filename)
+        process, content, title, intro = parser.check_file(content, filename)
 
         if not process:
-            print(f"Nothing to do for {filename:s}")
+            if not args.quiet:
+                print(f"Nothing to do for {filename:s}")
             continue
 
-        print(f"Processing {filename:s}... ", end="")
+        if not args.quiet:
+            print(f"Processing {filename:s}... ", end="")
 
-        out = process_file(content, lexer, formatter)
+        out = process_file(content, parser, lexer, formatter)
 
         out = DOCUMENT_TEMPLATE.format(title, intro, out)
 
-        with open(join(directory, f"{filename_base:s}.html"), 'w') as o_f:
-            o_f.write(out)
+        with open(join(directory, f"{filename_base:s}.html"), 'w') as o:
+            o.write(out)
 
-        with open(join(directory, "native.css"), 'w') as s_f:
-            s_f.write(NATIVE)
+        with open(join(directory, "native.css"), 'w') as s:
+            s.write(NATIVE)
 
-        print("Done.")
+        if not args.quiet:
+            print("Done.")
 
-    stop = time.time()
+    if not args.quiet:
+        stop = time.time()
 
-    total = stop - start
+        total = stop - start
 
-    print("")
-    print("All done!")
-    print("")
-    print(f"Processed {len(args.filenames):d} files in {total:f} seconds")
+        print("")
+        pHIGHLIGHT("All done!")
+        print("")
+
+        tmsg = f"Processed {len(args.filenames):d} files in {total:f} seconds"
+        print("-"*len(tmsg))
+        print(tmsg)
 
 
 if __name__ == "__main__":
     main()
 else:
-    sys.exit("Not meant to be imported!")
+    pERROR("elucipy is not meant to be imported!")

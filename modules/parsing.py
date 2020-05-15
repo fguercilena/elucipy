@@ -1,87 +1,136 @@
-"""Parse a file"""
-
-import sys
-from re import sub, MULTILINE
+from re import sub, MULTILINE, DOTALL
 from re import compile as compile_re
 
-
-explanation_regex = compile_re(r"(^[ \t\f\v]*# .*\n)+\n*", MULTILINE)
-header_regex = compile_re(r"((^[ \t\f\v]*)#{2,}\n)\2# (.*\n)\1\n*", MULTILINE)
-code_regex = compile_re(r"(^[ \t\f\v]*[^# \t\f\v\n].*\n)+\n*", MULTILINE)
-# triple_quote_regex = compile_re(r"\"\"\".*\"\"\"", DOTALL)
-# double_quote_regex = compile_re(r"\".*\"")
-# single_quote_regex = compile_re(r"\'.*\'")
+from modules.print_utils import pERROR
 
 
-def parse_block(text, pos):
-    """Parse text to identify the first block"""
+class Parser:
 
-    m = header_regex.match(text, pos)
-    if m:
-        return "header", m[3], m.end(0), m[0].count("\n")
+    def __init__(self, language):
 
-    m = explanation_regex.match(text, pos)
-    if m:
-        text = sub(r"^[ \t\f\v]*# ", "", m[0], flags=MULTILINE)
-        return "explanation", text, m.end(0), m[0].count("\n")
+        if language == "python":
 
-    m = code_regex.match(text, pos)
-    if m:
-        return "code", m[0], m.end(0), m[0].count("\n")
+            tmp = r"# elucipy{([^\n]*)}{(.*)}"
+            self.elucipy_regex = compile_re(tmp, DOTALL)
 
-    print("\nWarning: couldn't identify the following code:\n",
-          text[pos:pos + 200] + " [truncated]",
-          "Assuming the rest of the file contains only code "
-          "and continuing...")
-    return "code", text[pos:], len(text), text[pos:].count("\n")
+            self.intro_c = r"^\s*# "
 
+            tmp = r"(^[ \t\f\v]*# .*\n)+\n*"
+            self.explanation_regex = compile_re(tmp, MULTILINE)
 
-def merge_blocks(blocks):
-    """Merge consecutive blocks of the same type"""
+            tmp = r"((^[ \t\f\v]*)#{2,}\n)\2# (.*\n)\1\n*"
+            self.header_regex = compile_re(tmp, MULTILINE)
 
-    merged = []
+            self.code_regexes = []
+            tmp = r"(^[ \t\f\v]*[^# \t\f\v\n].*\n)+\n*"
+            self.code_regexes.append(compile_re(tmp, MULTILINE))
+            # triple_quote_regex = compile_re(r"\"\"\".*\"\"\"", DOTALL)
+            # double_quote_regex = compile_re(r"\".*\"")
+            # single_quote_regex = compile_re(r"\'.*\'")
 
-    for b in blocks:
+        elif language == "fortran":
 
-        t, v, ln = b
+            tmp = r"! elucipy{([^\n]*)}{(.*)}"
+            self.elucipy_regex = compile_re(tmp, DOTALL)
 
-        if t == "header":
-            if len(merged) == 0:
-                merged.append((t, v, ln))
-            elif merged[-1][0] == "header":
-                sys.exit("Error: found consecutive headers. Aborting.")
-            else:
-                merged.append((t, v, ln))
-        elif t == "explanation":
-            if len(merged) == 0:
-                merged.append((t, v, ln))
-            elif merged[-1][0] != "explanation":
-                merged.append((t, v, ln))
-            else:
-                merged[-1] = (t, merged[-1][1] + v, merged[-1][2] + ln)
-        elif t == "code":
-            if len(merged) == 0:
-                merged.append((t, v, ln))
-            elif merged[-1][0] != "code":
-                merged.append((t, v, ln))
-            else:
-                merged[-1] = (t, merged[-1][1] + v, merged[-1][2] + ln)
+            self.intro_c = r"^\s*! "
 
-    return merged
+            tmp = r"(^[ \t\f\v]*! .*\n)+\n*"
+            self.explanation_regex = compile_re(tmp, MULTILINE)
 
+            tmp = r"((^[ \t\f\v]*)!{2,}\n)\2! (.*\n)\1\n*"
+            self.header_regex = compile_re(tmp, MULTILINE)
 
-def get_blocks(content):
-    """Iterate trough a file and return its blocks"""
+            self.code_regexes = []
+            tmp = r"(^[ \t\f\v]*[^! \t\f\v\n].*\n)+\n*"
+            self.code_regexes.append(compile_re(tmp, MULTILINE))
 
-    blocks = []
+    def check_file(self, content, filename):
 
-    pos = 0
-    while pos < len(content):
+        match = self.elucipy_regex.search(content)
 
-        t, v, p, ln = parse_block(content, pos)
+        if match is None:
+            return False, None, None, None
 
-        blocks.append((t, v, ln))
+        if match.group(1) == "":
+            title = filename
+        else:
+            title = match.group(1)
 
-        pos = p
+        content = sub(self.elucipy_regex, "", content)
 
-    return merge_blocks(blocks)
+        intro = sub(self.intro_c, "", match.group(2), flags=MULTILINE)
+        if "NOTE" in intro:
+            intro = intro.replace("NOTE", '<span class="note">NOTE</span>')
+        if "TODO" in intro:
+            intro = intro.replace("TODO", '<span class="todo">TODO</span>')
+        if "BUG" in intro:
+            intro = intro.replace("BUG", '<span class="bug">BUG</span>')
+
+        return True, content, title, intro
+
+    def consume_block(self, text, pos):
+
+        m = self.header_regex.match(text, pos)
+        if m:
+            return "header", m[3], m.end(0), m[0].count("\n")
+
+        m = self.explanation_regex.match(text, pos)
+        if m:
+            text = sub(r"^[ \t\f\v]*# ", "", m[0], flags=MULTILINE)
+            return "explanation", text, m.end(0), m[0].count("\n")
+
+        for regex in self.code_regexes:
+            m = regex.match(text, pos)
+            if m:
+                return "code", m[0], m.end(0), m[0].count("\n")
+
+        pERROR("Cannot identify block!")
+
+    def merge_blocks(self, blocks):
+
+        merged = []
+
+        for b in blocks:
+
+            t, v, ln = b
+
+            if t == "header":
+                if len(merged) == 0:
+                    merged.append((t, v, ln))
+                elif merged[-1][0] == "header":
+                    pERROR("there appear to be consecutive"
+                           " headers in this file.")
+                else:
+                    merged.append((t, v, ln))
+            elif t == "explanation":
+                if len(merged) == 0:
+                    merged.append((t, v, ln))
+                elif merged[-1][0] != "explanation":
+                    merged.append((t, v, ln))
+                else:
+                    merged[-1] = (t, merged[-1][1] + v, merged[-1][2] + ln)
+            elif t == "code":
+                if len(merged) == 0:
+                    merged.append((t, v, ln))
+                elif merged[-1][0] != "code":
+                    merged.append((t, v, ln))
+                else:
+                    merged[-1] = (t, merged[-1][1] + v, merged[-1][2] + ln)
+
+        return merged
+
+    def get_blocks(self, content):
+
+        blocks = []
+
+        pos = 0
+        while pos < len(content):
+
+            t, v, p, ln = self.consume_block(content, pos)
+
+            blocks.append((t, v, ln))
+
+            pos = p
+
+        return self.merge_blocks(blocks)
