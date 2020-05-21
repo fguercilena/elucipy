@@ -7,9 +7,9 @@ from os.path import split, splitext, join
 from pygments.lexers import get_lexer_by_name, guess_lexer_for_filename
 from pygments.formatters import HtmlFormatter
 
-from modules.print_utils import pERROR, pHIGHLIGHT
-from modules.parsing import Parser
-from modules.process import process_file
+from modules.print_utils import print_error, print_highlight
+from modules.languages import languages
+from modules.process import preprocess_file, process_file
 from modules.html_templates import DOCUMENT_TEMPLATE
 from modules.styles import NATIVE
 
@@ -21,7 +21,8 @@ DESCRIPTION = """Generate a .html document showing the source code of the
 input files, with a parallel explanation running along it,
 generated from the comments in the code."""
 
-SUPPORTED_LAGUAGES = ("python", "fortran")
+# SUPPORTED_LAGUAGES = ("python", "fortran", "c++")
+SUPPORTED_LAGUAGES = ("python", "fortran", "c++")
 
 
 def main():
@@ -54,14 +55,10 @@ def main():
                               linenostep=1, lineanchors="line",
                               anchorlinenos=True, lineseparator="<br>")
 
-    # Setup the lexer and parser
-    tabsizes = {"python": 4, "fortran": 3}
-
     if args.lang is not None:
         lexer = get_lexer_by_name(args.lang, stripnl=False, stripall=False,
                                   ensurenl=True, encoding="utf-8",
-                                  tabsize=tabsizes[args.lang])
-        parser = Parser(args.lang)
+                                  tabsize=languages[args.lang].tabsize)
 
     else:
         with open(args.filenames[0], 'r') as i:
@@ -70,28 +67,25 @@ def main():
         lexer = guess_lexer_for_filename(args.filenames[0], content,
                                          stripnl=False, stripall=False,
                                          ensurenl=True, encoding="utf-8")
-        lexer_name = lexer.name.lower()
-        if lexer_name == "numpy":
+        args.lang = lexer.name.lower()
+        if args.lang == "numpy":
             lexer = get_lexer_by_name("python", stripnl=False, stripall=False,
                                       ensurenl=True, encoding="utf-8")
-            lexer_name = "python"
-        elif lexer_name not in SUPPORTED_LAGUAGES:
-            pERROR("Unsupported language (pygments guessed "
-                   f"the language as '{lexer_name:s}')")
+            args.lang = "python"
+        elif args.lang not in SUPPORTED_LAGUAGES:
+            print_error("Unsupported language (pygments guessed "
+                        f"the language as '{args.lang:s}')")
 
-        lexer.tabsize = tabsizes[lexer_name]
-        parser = Parser(lexer_name)
+        lexer.tabsize = languages[args.lang].tabsize
 
     if not args.quiet:
-        print("Processing input as "
-              f"'{args.lang if args.lang is not None else lexer_name:s}' "
-              "files.\n")
+        print(f"Processing input as '{args.lang:s}' files.\n")
 
     # Main loop over the input files
     for filename in args.filenames:
 
-        with open(filename, 'r') as i:
-            content = i.read()
+        with open(filename, 'r') as input_file:
+            content = input_file.read()
 
         directory, filename = split(filename)
         filename_base = splitext(filename)[0]
@@ -99,7 +93,8 @@ def main():
         if args.outdir is not None:
             directory = args.outdir
 
-        process, content, title, intro = parser.check_file(content, filename)
+        process, content, title, intro = preprocess_file(content, filename,
+                                                         languages[args.lang])
 
         if not process:
             if not args.quiet:
@@ -109,15 +104,17 @@ def main():
         if not args.quiet:
             print(f"Processing {filename:s}... ", end="")
 
-        out = process_file(content, parser, lexer, formatter)
+        out = process_file(content, languages[args.lang], lexer, formatter)
 
         out = DOCUMENT_TEMPLATE.format(title, intro, out)
 
-        with open(join(directory, f"{filename_base:s}.html"), 'w') as o:
-            o.write(out)
+        outfile_path = join(directory, f"{filename_base:s}.html")
+        with open(outfile_path, 'w') as output_file:
+            output_file.write(out)
 
-        with open(join(directory, "native.css"), 'w') as s:
-            s.write(NATIVE)
+        style_file_path = join(directory, "native.css")
+        with open(style_file_path, 'w') as style_file:
+            style_file.write(NATIVE)
 
         if not args.quiet:
             print("Done.")
@@ -128,7 +125,7 @@ def main():
         total = stop - start
 
         print("")
-        pHIGHLIGHT("All done!")
+        print_highlight("All done!")
         print("")
 
         tmsg = f"Processed {len(args.filenames):d} files in {total:f} seconds"
@@ -139,4 +136,4 @@ def main():
 if __name__ == "__main__":
     main()
 else:
-    pERROR("elucipy is not meant to be imported!")
+    print_error("elucipy is not meant to be imported!")

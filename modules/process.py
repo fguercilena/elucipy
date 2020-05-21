@@ -4,78 +4,110 @@ from pygments import highlight
 from .html_templates import ROW_TEMPLATE, HEADER_TEMPLATE
 
 
-def lineno_align(m):
+def preprocess_file(content, filename, language):
 
-    return f'<span class="lineno">{int(m.group(1)): 4d} <'
+    match = language.elucipy_regex.search(content)
 
+    if match is None:
+        return False, None, None, None
 
-def process_blocks(blocks, lexer, formatter):
-    """Highlight text in blocks"""
+    if match[2] == "":
+        title = filename
+    else:
+        title = match[2]
 
-    processed = []
+    content = language.elucipy_regex.sub("", content)
 
-    ln_tot = 1
+    intro = language.elucipy_trash.sub("", match[3])
 
-    for b in blocks:
+    intro = intro.replace("NOTE", '<span class="note">NOTE</span>')
+    intro = intro.replace("TODO", '<span class="todo">TODO</span>')
+    intro = intro.replace("BUG", '<span class="bug">BUG</span>')
 
-        t, v, ln = b
-
-        if t == "code":
-            formatter.linenostart = ln_tot
-            v = highlight(v, lexer, formatter).decode()
-        else:
-            if "NOTE" in v:
-                v = v.replace("NOTE", '<span class="note">NOTE</span>')
-            if "TODO" in v:
-                v = v.replace("TODO", '<span class="todo">TODO</span>')
-            if "BUG" in v:
-                v = v.replace("BUG", '<span class="bug">BUG</span>')
-
-        processed.append((t, v))
-
-        ln_tot += ln
-
-    return processed
+    return True, content, title, intro
 
 
-def process_file(content, parser, lexer, formatter):
+def lineno_align(match):
 
-    blocks = parser.get_blocks(content)
-    blocks = process_blocks(blocks, lexer, formatter)
+    return f'<span class="lineno">{int(match[1]): 4d} <'
 
+
+def process_header(header, trash):
+
+    header = trash.sub("", header)
+
+    header = header.replace("NOTE", '<span class="note">NOTE</span>')
+    header = header.replace("TODO", '<span class="todo">TODO</span>')
+    header = header.replace("BUG", '<span class="bug">BUG</span>')
+
+    return header
+
+
+def process_explanation(explanation, trash):
+
+    explanation = trash.sub("", explanation)
+
+    explanation = explanation.replace("#", "")
+    explanation = explanation.replace("\n", "<br>")
+
+    explanation = explanation.replace("NOTE", '<span class="note">NOTE</span>')
+    explanation = explanation.replace("TODO", '<span class="todo">TODO</span>')
+    explanation = explanation.replace("BUG", '<span class="bug">BUG</span>')
+
+    return explanation
+
+
+def process_code(code, lexer, formatter, line):
+
+    formatter.linenostart = line
+    return highlight(code, lexer, formatter).decode("utf-8")
+
+
+def process_file(content, language, lexer, formatter):
+
+    tmp_sections = language.header.split(content)
+
+    sections = []
+    for i, tmp_section in enumerate(tmp_sections):
+        ind = i % 4
+        if ind in (0, 1):
+            sections.append(tmp_section)
+    del tmp_sections
+
+    line = 1
     out = ""
+    for i, section in enumerate(sections):
 
-    i = 0
-    while i < len(blocks):
+        if i % 2 == 1:
+            header = process_header(section, language.header_trash)
+            out += HEADER_TEMPLATE.format(header)
 
-        b1 = blocks[i]
-        b2 = blocks[i + 1] if i != len(blocks) - 1 else (None, None)
+            line += section.count("\n")
+        else:
+            blocks = language.explanation.split(section)
 
-        t1, v1 = b1
-        t2, v2 = b2
+            if blocks[0] != "":
+                code = process_code(blocks[0], lexer, formatter, line)
+                out += ROW_TEMPLATE.format(code, "")
 
-        assert t1 != t2
+                line += blocks[0].count("\n")
 
-        if t1 == "code":
-            out += ROW_TEMPLATE.format(v1, "")
-            i += 1
-            continue
+            j = 1
+            while j < len(blocks):
 
-        if t1 == "explanation":
-            if t2 == "code":
-                out += ROW_TEMPLATE.format(v2, v1)
-            elif t2 == "header":
-                out += ROW_TEMPLATE.format("", v1)
-                out += HEADER_TEMPLATE.format(v2)
-            elif t2 is None:
-                out += ROW_TEMPLATE.format("", v1)
+                explanation_block = blocks[j]
+                code_block = blocks[j + 1] if j < len(blocks) - 1 else ""
 
-        elif t1 == "header":
-            out += HEADER_TEMPLATE.format(v1)
-            i += 1
-            continue
+                line += explanation_block.count("\n")
 
-        i += 2
+                code = process_code(code_block, lexer, formatter, line)
+                explanation = process_explanation(explanation_block,
+                                                  language.explanation_trash)
+                out += ROW_TEMPLATE.format(code, explanation)
+
+                line += code_block.count("\n")
+
+                j += 2
 
     out = sub('<span class="lineno"> *([0-9]+) <', lineno_align, out)
 
