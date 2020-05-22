@@ -1,0 +1,79 @@
+td.linenos { background-color: #f0f0f0; padding-right: 10px; }
+span.lineno { background-color: #f0f0f0; padding: 0 5px 0 5px; }
+pre { line-height: 125%; }
+body .hll { background-color: #ffffcc }
+body  { background: #ffffff; color: #4d4d4d }
+body .c { color: #0080ff; font-style: italic } /* Comment */
+body .err { color: #ffffff; background-color: #cc0000 } /* Error */
+body .k { color: #2c5dcd; font-weight: bold } /* Keyword */
+body .o { color: #2c5dcd } /* Operator */
+body .ch { color: #0080ff; font-style: italic } /* Comment.Hashbang */
+body .cm { color: #0080ff; font-style: italic } /* Comment.Multiline */
+body .cp { color: #0080ff } /* Comment.Preproc */
+body .cpf { color: #0080ff; font-style: italic } /* Comment.PreprocFile */
+body .c1 { color: #0080ff; font-style: italic } /* Comment.Single */
+body .cs { color: #0080ff; font-weight: bold; font-style: italic } /* Comment.Special */
+body .gd { background-color: #ffcccc; border: 1px solid #c5060b } /* Generic.Deleted */
+body .ge { font-style: italic } /* Generic.Emph */
+body .gr { color: #ff0000 } /* Generic.Error */
+body .gh { color: #2c5dcd; font-weight: bold } /* Generic.Heading */
+body .gi { background-color: #ccffcc; border: 1px solid #00cc00 } /* Generic.Inserted */
+body .go { color: #aaaaaa } /* Generic.Output */
+body .gp { color: #2c5dcd; font-weight: bold } /* Generic.Prompt */
+body .gs { font-weight: bold } /* Generic.Strong */
+body .gu { color: #2c5dcd; font-weight: bold } /* Generic.Subheading */
+body .gt { color: #c5060b } /* Generic.Traceback */
+body .kc { color: #2c5dcd; font-weight: bold } /* Keyword.Constant */
+body .kd { color: #2c5dcd; font-weight: bold } /* Keyword.Declaration */
+body .kn { color: #2c5dcd; font-weight: bold } /* Keyword.Namespace */
+body .kp { color: #2c5dcd } /* Keyword.Pseudo */
+body .kr { color: #2c5dcd; font-weight: bold } /* Keyword.Reserved */
+body .kt { color: #5918bb; font-weight: bold } /* Keyword.Type */
+body .m { color: #5918bb; font-weight: bold } /* Literal.Number */
+body .s { color: #00cc66 } /* Literal.String */
+body .na { color: #2c5dcd; font-style: italic } /* Name.Attribute */
+body .nb { color: #5918bb; font-weight: bold } /* Name.Builtin */
+body .nc { text-decoration: underline } /* Name.Class */
+body .no { color: #318495 } /* Name.Constant */
+body .nd { color: #ff8000; font-weight: bold } /* Name.Decorator */
+body .ni { color: #5918bb; font-weight: bold } /* Name.Entity */
+body .ne { color: #5918bb; font-weight: bold } /* Name.Exception */
+body .nf { color: #ff8000; font-weight: bold } /* Name.Function */
+body .nt { color: #2c5dcd; font-weight: bold } /* Name.Tag */
+body .ow { color: #2c5dcd; font-weight: bold } /* Operator.Word */
+body .w { color: #cbcbcb } /* Text.Whitespace */
+body .mb { color: #5918bb; font-weight: bold } /* Literal.Number.Bin */
+body .mf { color: #5918bb; font-weight: bold } /* Literal.Number.Float */
+body .mh { color: #5918bb; font-weight: bold } /* Literal.Number.Hex */
+body .mi { color: #5918bb; font-weight: bold } /* Literal.Number.Integer */
+body .mo { color: #5918bb; font-weight: bold } /* Literal.Number.Oct */
+body .sa { color: #00cc66 } /* Literal.String.Affix */
+body .sb { color: #00cc66 } /* Literal.String.Backtick */
+body .sc { color: #00cc66 } /* Literal.String.Char */
+body .dl { color: #00cc66 } /* Literal.String.Delimiter */
+body .sd { color: #00cc66; font-style: italic } /* Literal.String.Doc */
+body .s2 { color: #00cc66 } /* Literal.String.Double */
+body .se { color: #c5060b; font-weight: bold } /* Literal.String.Escape */
+body .sh { color: #00cc66 } /* Literal.String.Heredoc */
+body .si { color: #00cc66 } /* Literal.String.Interpol */
+body .sx { color: #318495 } /* Literal.String.Other */
+body .sr { color: #00cc66 } /* Literal.String.Regex */
+body .s1 { color: #00cc66 } /* Literal.String.Single */
+body .ss { color: #c5060b; font-weight: bold } /* Literal.String.Symbol */
+body .bp { color: #5918bb; font-weight: bold } /* Name.Builtin.Pseudo */
+body .fm { color: #ff8000; font-weight: bold } /* Name.Function.Magic */
+body .il { color: #5918bb; font-weight: bold } /* Literal.Number.Integer.Long */
+
+body .highlight { font-size: 1.2rem }
+
+body .intro { font-family: "Comic Sans MS", cursive, sans-serif;
+              font-size: 1.2rem }
+
+body .explanation { font-family: "Comic Sans MS", cursive, sans-serif;
+                    font-size: 1.1rem }
+
+body .note { color: green; font-weight: bold }
+body .todo { color: blue; font-weight: bold}
+body .bug { color: red; font-weight: bold}
+
+a { color: magenta }
