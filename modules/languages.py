@@ -42,7 +42,7 @@ _HEADER = compile(_LITERAL_STRINGS + r"""
 _HEADER_TRASH = compile(r"""
         ^[\ \t]*\#+[\ \t]*
         |
-        [\ \t]*\#*[\ \t]*$
+        [\ \t]*\#*[\ \t]*$\n*
         """, flags=_REGEX_FLAGS)
 
 _EXPLANATION = compile(_LITERAL_STRINGS + r"""
@@ -54,6 +54,8 @@ _EXPLANATION_trash = compile(r"""
         ^[\ \t]*\#[\ \t]*
         |
         [\ \t]*$
+        |
+        \n*\Z
         """, flags=_REGEX_FLAGS)
 
 _PYTHON = Language(_ELUCIPY_REGEX, _ELUCIPY_TRASH, _HEADER, _HEADER_TRASH,
@@ -99,6 +101,8 @@ _EXPLANATION_trash = compile(r"""
         ^[\ \t]*![\ \t]*
         |
         [\ \t]*$
+        |
+        \n*\Z
         """, flags=_REGEX_FLAGS)
 
 _FORTRAN = Language(_ELUCIPY_REGEX, _ELUCIPY_TRASH, _HEADER, _HEADER_TRASH,

@@ -39,6 +39,9 @@ def main():
     cl_parsr.add_argument("-s", "--style", default="default", dest="style",
                           choices=list(STYLES),
                           help="syntax highlight style")
+    cl_parsr.add_argument("--ignore-linebreaks", default=False,
+                          action="store_true", dest="ignore_lb",
+                          help="ignore linebreaks in explanations")
     cl_parsr.add_argument("-o", "--out-directory", default=None, dest="outdir",
                           help="output directory")
     cl_parsr.add_argument("-q", "--quiet", default=False, action="store_true",
@@ -108,7 +111,8 @@ def main():
         if not args.quiet:
             print(f"Processing {filename:s}... ", end="")
 
-        out = process_file(content, LANGUAGES[args.lang], lexer, formatter)
+        out = process_file(content, LANGUAGES[args.lang], lexer, formatter,
+                           args.ignore_lb)
 
         out = DOCUMENT_TEMPLATE.format(title, args.style, intro, out)
 

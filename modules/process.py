@@ -43,12 +43,12 @@ def process_header(header, trash):
     return header
 
 
-def process_explanation(explanation, trash):
+def process_explanation(explanation, trash, ignore_linebreaks=False):
 
     explanation = trash.sub("", explanation)
 
-    explanation = explanation.replace("#", "")
-    explanation = explanation.replace("\n", "<br>")
+    if not ignore_linebreaks:
+        explanation = explanation.replace("\n", "<br>")
 
     explanation = explanation.replace("NOTE", '<span class="note">NOTE</span>')
     explanation = explanation.replace("TODO", '<span class="todo">TODO</span>')
@@ -63,7 +63,7 @@ def process_code(code, lexer, formatter, line):
     return highlight(code, lexer, formatter).decode("utf-8")
 
 
-def process_file(content, language, lexer, formatter):
+def process_file(content, language, lexer, formatter, ignore_linebreaks):
 
     tmp_sections = language.header.split(content)
 
@@ -102,7 +102,8 @@ def process_file(content, language, lexer, formatter):
 
                 code = process_code(code_block, lexer, formatter, line)
                 explanation = process_explanation(explanation_block,
-                                                  language.explanation_trash)
+                                                  language.explanation_trash,
+                                                  ignore_linebreaks)
                 out += ROW_TEMPLATE.format(code, explanation)
 
                 line += code_block.count("\n")
