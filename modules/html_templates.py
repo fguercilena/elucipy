@@ -11,7 +11,7 @@ DOCUMENT_TEMPLATE = r"""
             src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
         </script>
 
-        <link rel="stylesheet" href="native.css" type="text/css">
+        <link rel="stylesheet" href="{1:s}.css" type="text/css">
     </head>
 
     <body>
@@ -19,11 +19,11 @@ DOCUMENT_TEMPLATE = r"""
         <h1> {0:s} </h1>
 
         <p class="intro">
-            {1:s}
+            {2:s}
         </p>
 
         <table style="width:100%">
-            {2:s}
+            {3:s}
         </table>
 
     </body>

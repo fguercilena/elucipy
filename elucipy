@@ -4,14 +4,15 @@
 import argparse
 import time
 from os.path import split, splitext, join
+from shutil import copyfile
 from pygments.lexers import get_lexer_by_name, guess_lexer_for_filename
 from pygments.formatters import HtmlFormatter
 
 from modules.print_utils import print_error, print_highlight
-from modules.languages import languages
+from modules.languages import LANGUAGES
 from modules.process import preprocess_file, process_file
 from modules.html_templates import DOCUMENT_TEMPLATE
-from modules.styles import NATIVE
+from modules.styles import STYLES
 
 
 VERSION = "elucipy -- version 0.1 (May 2020)"
@@ -20,9 +21,6 @@ EPILOG = """Federico Maria Guercilena
 DESCRIPTION = """Generate a .html document showing the source code of the
 input files, with a parallel explanation running along it,
 generated from the comments in the code."""
-
-# SUPPORTED_LAGUAGES = ("python", "fortran", "c++")
-SUPPORTED_LAGUAGES = ("python", "fortran", "c++")
 
 
 def main():
@@ -36,8 +34,11 @@ def main():
 
     cl_parsr.add_argument("filenames", nargs='+', help="input file(s) path")
     cl_parsr.add_argument("-l", "--language", default=None, dest="lang",
-                          choices=SUPPORTED_LAGUAGES,
+                          choices=list(LANGUAGES),
                           help="programming language of the input files")
+    cl_parsr.add_argument("-s", "--style", default="default", dest="style",
+                          choices=list(STYLES),
+                          help="syntax highlight style")
     cl_parsr.add_argument("-o", "--out-directory", default=None, dest="outdir",
                           help="output directory")
     cl_parsr.add_argument("-q", "--quiet", default=False, action="store_true",
@@ -58,7 +59,7 @@ def main():
     if args.lang is not None:
         lexer = get_lexer_by_name(args.lang, stripnl=False, stripall=False,
                                   ensurenl=True, encoding="utf-8",
-                                  tabsize=languages[args.lang].tabsize)
+                                  tabsize=LANGUAGES[args.lang].tabsize)
 
     else:
         with open(args.filenames[0], 'r') as i:
@@ -72,11 +73,14 @@ def main():
             lexer = get_lexer_by_name("python", stripnl=False, stripall=False,
                                       ensurenl=True, encoding="utf-8")
             args.lang = "python"
-        elif args.lang not in SUPPORTED_LAGUAGES:
+        elif args.lang not in LANGUAGES:
             print_error("Unsupported language (pygments guessed "
                         f"the language as '{args.lang:s}')")
 
-        lexer.tabsize = languages[args.lang].tabsize
+        lexer.tabsize = LANGUAGES[args.lang].tabsize
+
+    # Get the path to the style .css file
+    in_style_path = join("modules/styles", f"{args.style:s}.css")
 
     if not args.quiet:
         print(f"Processing input as '{args.lang:s}' files.\n")
@@ -94,7 +98,7 @@ def main():
             directory = args.outdir
 
         process, content, title, intro = preprocess_file(content, filename,
-                                                         languages[args.lang])
+                                                         LANGUAGES[args.lang])
 
         if not process:
             if not args.quiet:
@@ -104,17 +108,16 @@ def main():
         if not args.quiet:
             print(f"Processing {filename:s}... ", end="")
 
-        out = process_file(content, languages[args.lang], lexer, formatter)
+        out = process_file(content, LANGUAGES[args.lang], lexer, formatter)
 
-        out = DOCUMENT_TEMPLATE.format(title, intro, out)
+        out = DOCUMENT_TEMPLATE.format(title, args.style, intro, out)
 
         outfile_path = join(directory, f"{filename_base:s}.html")
         with open(outfile_path, 'w') as output_file:
             output_file.write(out)
 
-        style_file_path = join(directory, "native.css")
-        with open(style_file_path, 'w') as style_file:
-            style_file.write(NATIVE)
+        out_style_path = join(directory, f"{args.style:s}.css")
+        copyfile(in_style_path, out_style_path)
 
         if not args.quiet:
             print("Done.")

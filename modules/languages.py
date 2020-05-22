@@ -109,4 +109,4 @@ _FORTRAN = Language(_ELUCIPY_REGEX, _ELUCIPY_TRASH, _HEADER, _HEADER_TRASH,
 # Languages diictionary
 ###############################################################################
 
-languages = {"python": _PYTHON, "fortran": _FORTRAN}
+LANGUAGES = {"python": _PYTHON, "fortran": _FORTRAN}
