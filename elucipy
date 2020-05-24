@@ -78,11 +78,8 @@ def main():
                                          stripnl=False, stripall=False,
                                          ensurenl=True, encoding="utf-8")
         args.lang = lexer.name.lower()
-        if args.lang == "numpy":
-            lexer = get_lexer_by_name("python", stripnl=False, stripall=False,
-                                      ensurenl=True, encoding="utf-8")
-            args.lang = "python"
-        elif args.lang not in LANGUAGES:
+
+        if args.lang not in LANGUAGES:
             print_error("Unsupported language (pygments guessed "
                         f"the language as '{args.lang:s}')")
 

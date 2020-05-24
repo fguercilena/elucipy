@@ -1,7 +1,8 @@
-from pygments.formatters import HtmlFormatter
-from pygments.util import get_bool_opt, get_list_opt
 from subprocess import run
 import json
+
+from pygments.formatters import HtmlFormatter
+from pygments.util import get_bool_opt, get_list_opt
 
 
 class EFormatter(HtmlFormatter):
@@ -17,13 +18,13 @@ class EFormatter(HtmlFormatter):
                 command = "ctags"
                 options = ["--fields='+n'", "--output-format=json", "-f -"]
                 tagsfile = run([command, *options, *files],
-                               capture_output=True)
+                               capture_output=True, check=True)
                 tagsfile = tagsfile.stdout.decode("utf-8")
                 tagsfile = "[" + tagsfile.replace("\n", ",")[:-1] + "]"
                 data = json.loads(tagsfile)
 
-            except Exception as e:
-                print(e)
+            except Exception as excp:
+                print(excp)
                 raise
 
             tags = {}
@@ -40,5 +41,5 @@ class EFormatter(HtmlFormatter):
 
         if token in self._ctags:
             return self._ctags[token]["path"], self._ctags[token]["line"]
-        else:
-            return None, None
+
+        return None, None
