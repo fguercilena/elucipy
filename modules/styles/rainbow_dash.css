@@ -33,7 +33,7 @@ body .m { color: #5918bb; font-weight: bold } /* Literal.Number */
 body .s { color: #00cc66 } /* Literal.String */
 body .na { color: #2c5dcd; font-style: italic } /* Name.Attribute */
 body .nb { color: #5918bb; font-weight: bold } /* Name.Builtin */
-body .nc { text-decoration: underline } /* Name.Class */
+body .nc { } /* Name.Class */
 body .no { color: #318495 } /* Name.Constant */
 body .nd { color: #ff8000; font-weight: bold } /* Name.Decorator */
 body .ni { color: #5918bb; font-weight: bold } /* Name.Entity */

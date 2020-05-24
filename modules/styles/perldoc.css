@@ -37,7 +37,7 @@ body .no { color: #00688B } /* Name.Constant */
 body .nd { color: #707a7c } /* Name.Decorator */
 body .ne { color: #008b45; font-weight: bold } /* Name.Exception */
 body .nf { color: #008b45 } /* Name.Function */
-body .nn { color: #008b45; text-decoration: underline } /* Name.Namespace */
+body .nn { color: #008b45 } /* Name.Namespace */
 body .nt { color: #8B008B; font-weight: bold } /* Name.Tag */
 body .nv { color: #00688B } /* Name.Variable */
 body .ow { color: #8B008B } /* Operator.Word */

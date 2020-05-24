@@ -59,7 +59,7 @@ body .sd { color: #b85820; font-style: italic } /* Literal.String.Doc */
 body .s2 { color: #b83838 } /* Literal.String.Double */
 body .se { color: #709030 } /* Literal.String.Escape */
 body .sh { color: #b83838 } /* Literal.String.Heredoc */
-body .si { color: #b83838; text-decoration: underline } /* Literal.String.Interpol */
+body .si { color: #b83838 } /* Literal.String.Interpol */
 body .sx { color: #a848a8 } /* Literal.String.Other */
 body .sr { color: #a848a8 } /* Literal.String.Regex */
 body .s1 { color: #b83838 } /* Literal.String.Single */

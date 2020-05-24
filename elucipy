@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
-
 import argparse
 import time
+import os
 from os.path import split, splitext, join
 from shutil import copyfile
 from pygments.lexers import get_lexer_by_name, guess_lexer_for_filename
-from pygments.formatters import HtmlFormatter
 
+from modules.formatter import EFormatter
 from modules.print_utils import print_error, print_highlight
 from modules.languages import LANGUAGES
 from modules.process import preprocess_file, process_file
@@ -36,6 +36,9 @@ def main():
     cl_parsr.add_argument("-l", "--language", default=None, dest="lang",
                           choices=list(LANGUAGES),
                           help="programming language of the input files")
+    cl_parsr.add_argument("-c", "--ctags", default=False, dest="ctags",
+                          action="store_true",
+                          help="use ctags to annotate the code")
     cl_parsr.add_argument("-s", "--style", default="default", dest="style",
                           choices=list(STYLES),
                           help="syntax highlight style")
@@ -53,12 +56,15 @@ def main():
         start = time.time()
 
     # Setup the formatter
-    formatter = HtmlFormatter(full=False, encoding="utf-8",
-                              outencoding="utf-8",
-                              linenos="inline", linenostart=1,
-                              linenostep=1, lineanchors="line",
-                              anchorlinenos=True, lineseparator="<br>")
+    formatter = EFormatter(full=False,
+                           encoding="utf-8",
+                           outencoding="utf-8",
+                           linenos="inline", linenostart=1,
+                           linenostep=1, lineanchors="line",
+                           anchorlinenos=True, lineseparator="<br>",
+                           ctags=args.ctags, files=args.filenames)
 
+    # Set up the lexer, guessing the language if necessary
     if args.lang is not None:
         lexer = get_lexer_by_name(args.lang, stripnl=False, stripall=False,
                                   ensurenl=True, encoding="utf-8",
@@ -83,7 +89,8 @@ def main():
         lexer.tabsize = LANGUAGES[args.lang].tabsize
 
     # Get the path to the style .css file
-    in_style_path = join("modules/styles", f"{args.style:s}.css")
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    in_style_path = join(script_dir, "modules/styles", f"{args.style:s}.css")
 
     if not args.quiet:
         print(f"Processing input as '{args.lang:s}' files.\n")

@@ -32,12 +32,12 @@ body .m { color: #009999 } /* Literal.Number */
 body .s { color: #aa5500 } /* Literal.String */
 body .na { color: #1e90ff } /* Name.Attribute */
 body .nb { color: #00aaaa } /* Name.Builtin */
-body .nc { color: #00aa00; text-decoration: underline } /* Name.Class */
+body .nc { color: #00aa00 } /* Name.Class */
 body .no { color: #aa0000 } /* Name.Constant */
 body .nd { color: #888888 } /* Name.Decorator */
 body .ni { color: #880000; font-weight: bold } /* Name.Entity */
 body .nf { color: #00aa00 } /* Name.Function */
-body .nn { color: #00aaaa; text-decoration: underline } /* Name.Namespace */
+body .nn { color: #00aaaa } /* Name.Namespace */
 body .nt { color: #1e90ff; font-weight: bold } /* Name.Tag */
 body .nv { color: #aa0000 } /* Name.Variable */
 body .ow { color: #0000aa } /* Operator.Word */

@@ -52,7 +52,7 @@ body .py { color: #000000 } /* Name.Property */
 body .nt { color: #204a87; font-weight: bold } /* Name.Tag */
 body .nv { color: #000000 } /* Name.Variable */
 body .ow { color: #204a87; font-weight: bold } /* Operator.Word */
-body .w { color: #f8f8f8; text-decoration: underline } /* Text.Whitespace */
+body .w { color: #f8f8f8 } /* Text.Whitespace */
 body .mb { color: #0000cf; font-weight: bold } /* Literal.Number.Bin */
 body .mf { color: #0000cf; font-weight: bold } /* Literal.Number.Float */
 body .mh { color: #0000cf; font-weight: bold } /* Literal.Number.Hex */

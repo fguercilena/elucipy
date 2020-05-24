@@ -27,7 +27,7 @@ body .gi { color: #859900 } /* Generic.Inserted */
 body .go { color: #657b83 } /* Generic.Output */
 body .gp { color: #657b83 } /* Generic.Prompt */
 body .gs { color: #657b83; font-weight: bold } /* Generic.Strong */
-body .gu { color: #657b83; text-decoration: underline } /* Generic.Subheading */
+body .gu { color: #657b83 } /* Generic.Subheading */
 body .gt { color: #268bd2 } /* Generic.Traceback */
 body .kc { color: #2aa198 } /* Keyword.Constant */
 body .kd { color: #2aa198 } /* Keyword.Declaration */
