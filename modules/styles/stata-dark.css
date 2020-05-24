@@ -62,4 +62,4 @@ body .note { color: green; font-weight: bold }
 body .todo { color: blue; font-weight: bold}
 body .bug { color: red; font-weight: bold}
 
-a { color: magenta }
+a { color: inherit; text-decoration: underline  }
