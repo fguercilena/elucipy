@@ -3,7 +3,7 @@
 import argparse
 import time
 import os
-from os.path import split, splitext, join
+from os.path import split, join
 from shutil import copyfile
 from pygments.lexers import get_lexer_by_name, guess_lexer_for_filename
 
@@ -99,7 +99,6 @@ def main():
             content = input_file.read()
 
         directory, filename = split(filename)
-        filename_base = splitext(filename)[0]
 
         if args.outdir is not None:
             directory = args.outdir
@@ -120,7 +119,7 @@ def main():
 
         out = DOCUMENT_TEMPLATE.format(title, args.style, intro, out)
 
-        outfile_path = join(directory, f"{filename_base:s}.html")
+        outfile_path = join(directory, f"{filename:s}.html")
         with open(outfile_path, 'w') as output_file:
             output_file.write(out)
 

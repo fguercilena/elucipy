@@ -1,8 +1,8 @@
 from collections import namedtuple
-from regex import compile, MULTILINE, VERBOSE, VERSION1
+from regex import compile, MULTILINE, VERBOSE, VERSION1, DOTALL
 
 
-_REGEX_FLAGS = VERBOSE | VERSION1 | MULTILINE
+_REGEX_FLAGS = VERBOSE | VERSION1 | MULTILINE | DOTALL
 
 
 Language = namedtuple("Language", ("elucipy_regex", "elucipy_trash",
@@ -13,21 +13,28 @@ Language = namedtuple("Language", ("elucipy_regex", "elucipy_trash",
 LANGUAGES = {}
 
 
+_COMMON_WORDS = r"""
+    (  # Start group 1 encompassing the entire expression
+    don't(*SKIP)(*FAIL)
+    |
+    """
+
 ###############################################################################
 # Python
 ###############################################################################
 
-_LITERAL_STRINGS = r"""
-    (  # Start group 1 encompassing the entire expression
-    '''(?:[^']|\\')*'''(*SKIP)(*FAIL)        # ''' string literal, ignored
+_LITERAL_STRINGS = _COMMON_WORDS + r"""
+    '''(?:'(?!'')|[^'])*'''(*SKIP)(*FAIL)  # ''' string literal, ignored
     |
-    '(?:[^']|\\')*'(*SKIP)(*FAIL)            # ' string literal, ignored
-    |
-    \"\"\"(?:[^"]|\\")*\"\"\"(*SKIP)(*FAIL)  # ""\" string literal, ignored
-    |
-    "(?:[^"]|\\")*"(*SKIP)(*FAIL)            # " string literal, ignored
+    '(?:[^']|(?!<\\)\\')*'(*SKIP)(*FAIL)   # ' string literal, ignored
     |
     """
+_LITERAL_STRINGS += r'''
+    """(?:"(?!"")|[^"])*"""(*SKIP)(*FAIL)  # """ string literal, ignored
+    |
+    "(?:[^"]|(?!<\\)\\")*"(*SKIP)(*FAIL)   # " string literal, ignored
+    |
+    '''
 
 _ELUCIPY_REGEX = compile(_LITERAL_STRINGS + r"""
     ^\#\ elucipy{([^}]*)}{([^}]*)}\n*
@@ -71,11 +78,10 @@ LANGUAGES["numpy"] = _PYTHON
 # Fortran
 ###############################################################################
 
-_LITERAL_STRINGS = r"""
-    (  # Start group 1 encompassing the entire expression
-    '(?:[^']|\\')*'(*SKIP)(*FAIL)            # ' string literal, ignored
+_LITERAL_STRINGS = _COMMON_WORDS + r"""
+    '(?:[^']|(?!<\\)\\')*'(*SKIP)(*FAIL)   # " string literal, ignored
     |
-    "(?:[^"]|\\")*"(*SKIP)(*FAIL)            # " string literal, ignored
+    "(?:[^"]|(?!<\\)\\")*"(*SKIP)(*FAIL)   # " string literal, ignored
     |
     """
 
@@ -117,14 +123,13 @@ LANGUAGES["fortran"] = _FORTRAN
 
 
 ###############################################################################
-# C/C++/Objective-C/Objective-C++
+# C / C++ / Objective-C / Objective-C++
 ###############################################################################
 
-_LITERAL_STRINGS = r"""
-    (  # Start group 1 encompassing the entire expression
-    '(?:[^']|\\')*'(*SKIP)(*FAIL)            # ' string literal, ignored
+_LITERAL_STRINGS = _COMMON_WORDS + r"""
+    '(?:[^']|(?!<\\)\\')*'(*SKIP)(*FAIL)   # " string literal, ignored
     |
-    "(?:[^"]|\\")*"(*SKIP)(*FAIL)            # " string literal, ignored
+    "(?:[^"]|(?!<\\)\\")*"(*SKIP)(*FAIL)   # " string literal, ignored
     |
     """
 
@@ -166,3 +171,6 @@ LANGUAGES["c"] = _CLANGS
 LANGUAGES["c++"] = _CLANGS
 LANGUAGES["objective-c"] = _CLANGS
 LANGUAGES["objective-c++"] = _CLANGS
+
+
+# elucipy{}{Stuff.}
