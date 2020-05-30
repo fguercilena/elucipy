@@ -1,8 +1,6 @@
-from subprocess import run
 import json
 
 from pygments.formatters import HtmlFormatter
-from pygments.util import get_bool_opt, get_list_opt
 
 
 class EFormatter(HtmlFormatter):
@@ -10,32 +8,24 @@ class EFormatter(HtmlFormatter):
     def __init__(self, **options):
         HtmlFormatter.__init__(self, **options)
 
-        if get_bool_opt(options, "ctags", False):
+        self.ctagsfile = options.get("ctagsfile", None)
 
-            files = get_list_opt(options, "files", [])
+        if self.ctagsfile is not None:
 
-            try:
-                command = "ctags"
-                options = ["--fields='+n'", "--output-format=json", "-f -"]
-                tagsfile = run([command, *options, *files],
-                               capture_output=True, check=True)
-                tagsfile = tagsfile.stdout.decode("utf-8")
-                tagsfile = "[" + tagsfile.replace("\n", ",")[:-1] + "]"
-                data = json.loads(tagsfile)
-
-            except Exception as excp:
-                print(excp)
-                raise
+            # ctags --fields='+n' --output-format=json -f ctagsfile
+            with open(self.ctagsfile, 'r') as inctags:
+                tmp = inctags.readlines()
 
             tags = {}
-            for tag in data:
+            for tag in tmp:
+                tag = json.loads(tag)
                 if tag["_type"] == "tag":
                     tags[tag["name"]] = tag
                     del tags[tag["name"]]["name"]
 
             self._ctags = tags
-            self.tagurlformat = "%(fname)s.html"
-            self.tagsfile = "internal"
+            self.tagurlformat = "%(fname)s%(fext)s.html"
+            self.tagsfile = "placeholder"
 
     def _lookup_ctag(self, token):
 

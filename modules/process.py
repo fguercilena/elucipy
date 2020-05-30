@@ -64,8 +64,8 @@ def process_code(code, lexer, formatter, line):
     return highlight(code, lexer, formatter).decode("utf-8")
 
 
-def process_file(content, language, lexer, formatter, ignore_linebreaks,
-                 invert):
+def process_file(content, language, lexer, formatter, ignore_linebreaks=False,
+                 invert=False):
 
     tmp_sections = language.header.split(content)
 

@@ -36,9 +36,8 @@ def main():
     cl_parsr.add_argument("-l", "--language", default=None, dest="lang",
                           choices=list(LANGUAGES),
                           help="programming language of the input files")
-    cl_parsr.add_argument("-c", "--ctags", default=False, dest="ctags",
-                          action="store_true",
-                          help="use ctags to annotate the code")
+    cl_parsr.add_argument("-c", "--ctags-file", default=None, dest="ctagsfile",
+                          help="ctags file path")
     cl_parsr.add_argument("-s", "--style", default="default", dest="style",
                           choices=list(STYLES),
                           help="syntax highlight style")
@@ -66,7 +65,7 @@ def main():
                            linenos="inline", linenostart=1,
                            linenostep=1, lineanchors="line",
                            anchorlinenos=True, lineseparator="<br>",
-                           ctags=args.ctags, files=args.filenames)
+                           ctagsfile=args.ctagsfile)
 
     # Set up the lexer, guessing the language if necessary
     if args.lang is not None:
