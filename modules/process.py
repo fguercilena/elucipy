@@ -1,7 +1,8 @@
 from re import sub
 from pygments import highlight
 
-from .html_templates import ROW_TEMPLATE, HEADER_TEMPLATE
+from .html_templates import ROW_TEMPLATE_RIGHT, ROW_TEMPLATE_LEFT
+from .html_templates import HEADER_TEMPLATE
 
 
 def preprocess_file(content, filename, language):
@@ -63,7 +64,8 @@ def process_code(code, lexer, formatter, line):
     return highlight(code, lexer, formatter).decode("utf-8")
 
 
-def process_file(content, language, lexer, formatter, ignore_linebreaks):
+def process_file(content, language, lexer, formatter, ignore_linebreaks,
+                 invert):
 
     tmp_sections = language.header.split(content)
 
@@ -88,7 +90,10 @@ def process_file(content, language, lexer, formatter, ignore_linebreaks):
 
             if blocks[0] != "":
                 code = process_code(blocks[0], lexer, formatter, line)
-                out += ROW_TEMPLATE.format(code, "")
+                if invert:
+                    out += ROW_TEMPLATE_LEFT.format("", code)
+                else:
+                    out += ROW_TEMPLATE_RIGHT.format(code, "")
 
                 line += blocks[0].count("\n")
 
@@ -104,7 +109,10 @@ def process_file(content, language, lexer, formatter, ignore_linebreaks):
                 explanation = process_explanation(explanation_block,
                                                   language.explanation_trash,
                                                   ignore_linebreaks)
-                out += ROW_TEMPLATE.format(code, explanation)
+                if invert:
+                    out += ROW_TEMPLATE_LEFT.format(explanation, code)
+                else:
+                    out += ROW_TEMPLATE_RIGHT.format(code, explanation)
 
                 line += code_block.count("\n")
 

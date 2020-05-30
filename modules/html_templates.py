@@ -31,12 +31,23 @@ DOCUMENT_TEMPLATE = r"""
 </html>
 """
 
-ROW_TEMPLATE = r"""
+ROW_TEMPLATE_RIGHT = r"""
 <tr>
     <td style="vertical-align: top">
         {0:s}
     </td>
     <td style="vertical-align: top" class="explanation">
+        {1:s}
+    </td>
+</tr>
+"""
+
+ROW_TEMPLATE_LEFT = r"""
+<tr>
+    <td style="vertical-align: top" class="explanation">
+        {0:s}
+    </td>
+    <td style="vertical-align: top">
         {1:s}
     </td>
 </tr>
