@@ -15,8 +15,8 @@ body .x { color: #d0d0d0 } /* Other */
 body .p { color: #d0d0d0 } /* Punctuation */
 body .ch { color: #5f5f5f; font-style: italic } /* Comment.Hashbang */
 body .cm { color: #5f5f5f; font-style: italic } /* Comment.Multiline */
-body .cp { color: #5f5f5f } /* Comment.Preproc */
-body .cpf { color: #5f5f5f; font-style: italic } /* Comment.PreprocFile */
+body .cp { color: #00afff } /* Comment.Preproc */
+body .cpf { color: #87d787; } /* Comment.PreprocFile */
 body .c1 { color: #5f5f5f; font-style: italic } /* Comment.Single */
 body .cs { color: #5f5f5f; background-color: #520000 } /* Comment.Special */
 body .gd { color: #d22323 } /* Generic.Deleted */

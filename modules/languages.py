@@ -17,6 +17,10 @@ _COMMON_WORDS = r"""
     (  # Start group 1 encompassing the entire expression
     don't(*SKIP)(*FAIL)
     |
+    it's(*SKIP)(*FAIL)
+    |
+    's(*SKIP)(*FAIL)
+    |
     """
 
 ###############################################################################
