@@ -1,29 +1,37 @@
 DOCUMENT_TEMPLATE = r"""
+<!DOCTYPE html>
 <html>
     <head>
         <title> {0:s} </title>
 
-        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <meta charset="utf-8">
 
-        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
-        </script>
+        <meta name="viewport" content="width=device-width">
         <script id="MathJax-script" async
-            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+            src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js">
         </script>
 
-        <link rel="stylesheet" href="{1:s}.css" type="text/css">
+        <style>
+            {1:s}
+            * {{ font-size: large }}
+            table, th, td {{
+                border: 1px solid black;
+                border-collapse: collapse;
+            }}
+        </style>
     </head>
 
     <body>
 
         <h1> {0:s} </h1>
 
+        <!--
         <p class="intro">
-            {2:s}
         </p>
+        -->
 
         <table style="width:100%">
-            {3:s}
+            {2:s}
         </table>
 
     </body>
