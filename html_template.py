@@ -18,6 +18,13 @@ DOCUMENT_TEMPLATE = r"""
                 border: 1px solid black;
                 border-collapse: collapse;
             }}
+            .explanation {{
+                font-family: serif;
+            }}
+            h1 {{
+                font-size: x-large;
+                font-weight: bolder;
+            }}
         </style>
     </head>
 
