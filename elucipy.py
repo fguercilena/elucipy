@@ -59,10 +59,6 @@ def get_blocks(code, lexer):
     line_number = 1
     for t, group in groups:
 
-        # TODO: These two do not seem to be needed
-        start = group[0][0]
-        end = group[-1][0] + len(group[-1][2])
-
         content = ""
         count_linebreaks = 0
         for _, _, token in group:
@@ -71,7 +67,6 @@ def get_blocks(code, lexer):
 
             # Remove comment markers from comment lines. These line are specific
             # to C++
-            # TODO: Remove them
             if t == 1:
                 token = re.sub(r"//", "", token, count=1).lstrip()
             elif t == 2:
@@ -79,17 +74,14 @@ def get_blocks(code, lexer):
 
             content += token
 
-        blocks.append((start, end, line_number, content))
+        blocks.append((line_number, content))
 
-        # TODO: the line numbers are necessary because later they get passed to
-        # the formatter to show them ion the HTML output. However the present
-        # calculation seem to lead wrong numbers in some instances
         line_number += count_linebreaks
 
     # If the first block is a code one, prepend an empty comment block to
     # everything. This simplifies the logic later.
     if groups[0][0] == 0:
-        blocks = [(0, 0, 0, "")] + blocks
+        blocks = [(0, "")] + blocks
 
     return blocks
 
@@ -110,13 +102,13 @@ def process_blocks(
         if len(tmp) == 2:
             explanation, code = tmp
 
-            _, _, line_number, code = code
+            line_number, code = code
             formatter.linenostart = line_number
             code = highlight(code, lexer, formatter).decode("utf-8")
         else:
             explanation = tmp[0]
 
-        _, _, line_number, explanation = explanation
+        line_number, explanation = explanation
         if not ignore_line_breaks:
             explanation = explanation.replace("\n", "<br>")
 
@@ -182,6 +174,7 @@ def main():
     # TODO: let Pygment guess the correct lexer
     lexer = CppLexer(stripnl=True, stripall=False, ensurenl=True, tabsize=4)
 
+    # TODO: add support for Latex output as well
     # Get the HTML formatter from Pygments
     formatter = HtmlFormatter(
         full=False,
