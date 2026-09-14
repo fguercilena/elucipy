@@ -95,7 +95,9 @@ def get_blocks(code, lexer):
 
 
 # Format the code blocks and put them into an HTM table
-def process_blocks(blocks, lexer, formatter):
+def process_blocks(
+    blocks, lexer, formatter, invert_layout=False, ignore_line_breaks=False
+):
 
     out = ""
 
@@ -115,9 +117,14 @@ def process_blocks(blocks, lexer, formatter):
             explanation = tmp[0]
 
         _, _, line_number, explanation = explanation
+        if not ignore_line_breaks:
+            explanation = explanation.replace("\n", "<br>")
 
         # Put the text into the HTML table template
-        out += ROW_TEMPLATE_RIGHT.format(code, explanation)
+        if invert_layout:
+            out += ROW_TEMPLATE_LEFT.format(code, explanation)
+        else:
+            out += ROW_TEMPLATE_RIGHT.format(code, explanation)
 
     return out
 
@@ -144,7 +151,6 @@ def main():
         choices=list(get_all_styles()),
         help="syntax highlight style",
     )
-    # TODO: this option is ingored at the moment
     cl_parsr.add_argument(
         "--ignore-linebreaks",
         default=False,
@@ -152,7 +158,6 @@ def main():
         dest="ignore_lb",
         help="ignore linebreaks in explanations",
     )
-    # TODO: this option is ingored at the moment
     cl_parsr.add_argument(
         "--invert-layout",
         default=False,
@@ -210,7 +215,9 @@ def main():
             print(f"Processing {filename:s}... ", end="")
 
         # Process the content
-        out = process_blocks(get_blocks(text, lexer), lexer, formatter)
+        out = process_blocks(
+            get_blocks(text, lexer), lexer, formatter, args.invert, args.ignore_lb
+        )
         out = DOCUMENT_TEMPLATE.format(filename, style_css, out)
 
         # Write the output HTML file
